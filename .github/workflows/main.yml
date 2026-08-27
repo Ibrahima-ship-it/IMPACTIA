@@ -1,19 +1,17 @@
-version: 2.1
+name: Test Acceptation Etape 5
+on: [push, workflow_dispatch]
+
 jobs:
-  test:
-    remote_docker:
-      version: 24.0.7
-    docker:
-      - image: cimg/base:current
+runs-on: ubuntu-latest
+    runs-level: ubuntu-latest
     steps:
-      - checkout
-      - run:
-          name: "Execution de la recette automatique"
-          command: |
-            cp .env.example .env
-            bash scripts/runtime_acceptance.sh
-workflows:
-  version: 2
-  execute_test:
-    jobs:
-      - test
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+
+      - name: Verifier l'installation de Docker
+        run: docker compose version
+
+      - name: Executer la recette d'acceptation reelle
+        run: |
+          cp .env.example .env
+          bash scripts/runtime_acceptance.sh
