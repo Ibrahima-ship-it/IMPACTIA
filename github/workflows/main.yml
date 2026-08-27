@@ -1,16 +1,52 @@
 name: Recette Acceptance Etape 5
-on: [push, workflow_dispatch]
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ETAPE_5_PACK_CONTENEURS_SECURITE_JELASTIC_DDI_BIV_V4*.zip'
+
+permissions:
+  contents: read
 
 jobs:
   run-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
-      - name: Recuperer le code ZIP
+      - name: Récupérer le dépôt
         uses: actions/checkout@v4
-      - name: Decompresser le pack de test
-        run: unzip 'ETAPE_5_PACK_CONTENEURS_SECURITE_JELASTIC_DDI_BIV_V4 (3).zip'
-      - name: Executer le script de test
+
+      - name: Décompresser le pack
+        shell: bash
         run: |
-          cd ETAPE_5_DDI_BIV_V4
-          cp .env.example .env
-          bash scripts/runtime_acceptance.sh
+          set -euo pipefail
+          zip_file=$(find . -maxdepth 1 -type f -name 'ETAPE_5_PACK_CONTENEURS_SECURITE_JELASTIC_DDI_BIV_V4*.zip' -print -quit)
+          test -n "$zip_file"
+          unzip -q "$zip_file"
+
+      - name: Exécuter la recette complète
+        working-directory: ETAPE_5_DDI_BIV_V4
+        run: scripts/runtime_acceptance.sh | tee acceptance.log
+
+      - name: Vérifier le verdict binaire
+        working-directory: ETAPE_5_DDI_BIV_V4
+        run: grep -Fx 'VERDICT_ETAPE_5=20/20' acceptance.log
+
+      - name: Conserver les preuves non sensibles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preuves-etape-5
+          path: |
+            ETAPE_5_DDI_BIV_V4/acceptance.log
+            ETAPE_5_DDI_BIV_V4/TEST_RESULTS.json
+          retention-days: 30
+
+      - name: Purger les secrets éphémères
+        if: always()
+        working-directory: ETAPE_5_DDI_BIV_V4
+        run: |
+          test ! -f .env || shred -u .env
+          test ! -f certs/privkey.pem || shred -u certs/privkey.pem
+          test ! -f certs/fullchain.pem || shred -u certs/fullchain.pem
