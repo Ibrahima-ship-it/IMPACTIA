@@ -5,10 +5,14 @@ jobs:
   run-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Recuperer le code
+      - name: Recuperer le code ZIP
         uses: actions/checkout@v4
+
+      - name: Decompresser le pack de test
+        run: unzip ETAPE_5_PACK_CONTENEURS_SECURITE_JELASTIC_DDI_BIV_V4.zip
 
       - name: Executer le script de test
         run: |
+          cd ETAPE_5_DDI_BIV_V4
           cp .env.example .env
           bash scripts/runtime_acceptance.sh
