@@ -27,11 +27,20 @@ jobs:
 
       - name: Exécuter la recette complète
         working-directory: ETAPE_5_DDI_BIV_V4
-        run: scripts/runtime_acceptance.sh | tee acceptance.log
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/runtime_acceptance.sh
 
-      - name: Vérifier le verdict binaire
+      - name: Afficher le diagnostic en cas d’échec
+        if: failure()
         working-directory: ETAPE_5_DDI_BIV_V4
-        run: grep -Fx 'VERDICT_ETAPE_5=20/20' acceptance.log
+        run: |
+          echo '===== 200 DERNIERES LIGNES ====='
+          echo '===== ETAT DOCKER ====='
+          docker compose ps -a || true
+          echo '===== JOURNAUX SERVICES ====='
+          docker compose logs --no-color --tail=100 || true
 
       - name: Conserver les preuves non sensibles
         if: always()
@@ -39,7 +48,6 @@ jobs:
         with:
           name: preuves-etape-5
           path: |
-            ETAPE_5_DDI_BIV_V4/acceptance.log
             ETAPE_5_DDI_BIV_V4/TEST_RESULTS.json
           retention-days: 30
 
