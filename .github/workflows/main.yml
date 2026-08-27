@@ -10,8 +10,5 @@ jobs:
 
       - name: Executer le script de test
         run: |
-          cd ETAPE_5_DDI_BIV_V4
           cp .env.example .env
           bash scripts/runtime_acceptance.sh
-
-
