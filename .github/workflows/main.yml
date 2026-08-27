@@ -1,0 +1,19 @@
+version: 2.1
+jobs:
+  test:
+    remote_docker:
+      version: 24.0.7
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - run:
+          name: "Execution de la recette automatique"
+          command: |
+            cp .env.example .env
+            bash scripts/runtime_acceptance.sh
+workflows:
+  version: 2
+  execute_test:
+    jobs:
+      - test
