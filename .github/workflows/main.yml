@@ -9,7 +9,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Decompresser le pack de test
-        run: unzip ETAPE_5_PACK_CONTENEURS_SECURITE_JELASTIC_DDI_BIV_V4.zip
+        run: unzip *.zip
 
       - name: Executer le script de test
         run: |
