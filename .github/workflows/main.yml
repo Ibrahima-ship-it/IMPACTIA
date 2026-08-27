@@ -2,8 +2,8 @@ name: Test Acceptation Etape 5
 on: [push, workflow_dispatch]
 
 jobs:
-runs-on: ubuntu-latest
-    runs-level: ubuntu-latest
+runtime-test:
+    runs-on: ubuntu-latest
     steps:
       - name: Recuperer le code
         uses: actions/checkout@v4
