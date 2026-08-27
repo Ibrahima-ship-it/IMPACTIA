@@ -27,7 +27,21 @@ jobs:
 
       - name: Exécuter la recette complète
         working-directory: ETAPE_5_DDI_BIV_V4
-        run: scripts/runtime_acceptance.sh | tee acceptance.log
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/runtime_acceptance.sh 2>&1 | tee acceptance.log
+
+      - name: Afficher le diagnostic en cas d’échec
+        if: failure()
+        working-directory: ETAPE_5_DDI_BIV_V4
+        run: |
+          echo '===== 200 DERNIERES LIGNES ====='
+          tail -n 200 acceptance.log || true
+          echo '===== ETAT DOCKER ====='
+          docker compose ps -a || true
+          echo '===== JOURNAUX SERVICES ====='
+          docker compose logs --no-color --tail=100 || true
 
       - name: Vérifier le verdict binaire
         working-directory: ETAPE_5_DDI_BIV_V4
